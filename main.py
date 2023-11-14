@@ -71,8 +71,10 @@ def calculate_cost(q_count, d_count, n_count, p_count, chosen_item):
     total = q_worth + d_worth + n_worth + p_worth
 
     if total >= MENU[chosen_item]["cost"]:
+        """Checking for sufficient deposit for the order and returning the change if necessary."""
         return total - MENU[chosen_item]["cost"]
     else:
+        """Insufficient deposit."""
         return False
 
 
@@ -97,8 +99,10 @@ def process_order(item_chosen):
         change = calculate_cost(quarters, dimes, nickles, pennies, item_chosen)
 
         if not change:
+            """Insufficient deposit."""
             print("Sorry, that's not enough money. Money refunded.")
         else:
+            """Sufficient deposit. Delivering order."""
             resources["deposit"] += MENU[item_chosen]["cost"]
             update_inventory(item_chosen, resources)
             print(f"Here is ${"%.2f" % change} in change.")
@@ -114,7 +118,7 @@ while True:
         """Turning off the system."""
         break
 
-    if prompt == "report":
+    elif prompt == "report":
         """Generating report of the inventory."""
         water = report("water")
         milk = report("milk")
@@ -126,5 +130,8 @@ while True:
         print(f"Coffee: {coffee}")
         print(f"Money: ${deposit}")
 
-    if prompt == "espresso" or prompt == "latte" or prompt == "cappuccino":
+    elif prompt == "espresso" or prompt == "latte" or prompt == "cappuccino":
         process_order(prompt)
+
+    else:
+        print("Invalid answer! Please try again.")
