@@ -47,21 +47,22 @@ def report(inventory):
 
 def check_resources(order):
     """Checking availability of the resources."""
-    available_water = resources["water"]
-    available_milk = resources["milk"]
-    available_coffee = resources["coffee"]
+    water_stock = resources["water"]
+    milk_stock = resources["milk"]
+    coffee_stock = resources["coffee"]
 
     required_water = MENU[order]["ingredients"]["water"]
     required_milk = MENU[order]["ingredients"]["milk"]
     required_coffee = MENU[order]["ingredients"]["coffee"]
 
-    if available_water >= required_water and available_milk >= required_milk and available_coffee >= required_coffee:
+    if water_stock >= required_water and milk_stock >= required_milk and coffee_stock >= required_coffee:
         return True
     else:
         return False
 
 
 def calculate_cost(q_count, d_count, n_count, p_count, chosen_item):
+    """Calculate the total cost as well as the change."""
     q_worth = q_count * currency["quarters"]
     d_worth = d_count * currency["dimes"]
     n_worth = n_count * currency["nickles"]
@@ -76,9 +77,34 @@ def calculate_cost(q_count, d_count, n_count, p_count, chosen_item):
 
 
 def update_inventory(chosen_item, inventory):
+    """Updating the inventory after each order."""
     inventory["water"] -= MENU[chosen_item]["ingredients"]["water"]
     inventory["milk"] -= MENU[chosen_item]["ingredients"]["milk"]
     inventory["coffee"] -= MENU[chosen_item]["ingredients"]["coffee"]
+
+
+def process_order(item_chosen):
+    """Processing the order."""
+    ingredients_available = check_resources(item_chosen)
+
+    if ingredients_available:
+        print("Please insert coins.")
+        quarters = int(input("How many quarters: "))
+        dimes = int(input("How many dimes: "))
+        nickles = int(input("How many nickles: "))
+        pennies = int(input("How many pennies: "))
+
+        change = calculate_cost(quarters, dimes, nickles, pennies, item_chosen)
+
+        if not change:
+            print("Sorry, that's not enough money. Money refunded.")
+        else:
+            resources["deposit"] += MENU[item_chosen]["cost"]
+            update_inventory(item_chosen, resources)
+            print(f"Here is ${"%.2f" % change} in change.")
+            print(f"Here is your {item_chosen}! Enjoy!")
+    else:
+        print("Sorry! Insufficient inventory.")
 
 
 while True:
@@ -100,28 +126,5 @@ while True:
         print(f"Coffee: {coffee}")
         print(f"Money: ${deposit}")
 
-    if prompt == "espresso":
-        ingredients_available = check_resources(prompt)
-
-        if ingredients_available:
-            print("Please insert coins.")
-            quarters = int(input("How many quarters: "))
-            dimes = int(input("How many dimes: "))
-            nickles = int(input("How many nickles: "))
-            pennies = int(input("How many pennies: "))
-
-            change = calculate_cost(quarters, dimes, nickles, pennies, prompt)
-
-            if not change:
-                print("Sorry, that's not enough money. Money refunded.")
-            else:
-                resources["deposit"] += MENU[prompt]["cost"]
-                update_inventory(prompt, resources)
-                print(f"Here is ${"%.2f" % change} in change.")
-                print(f"Here is your {prompt}! Enjoy!")
-        else:
-            print("Sorry! Insufficient inventory.")
-    # elif prompt == "latte":
-    #     ingredients_available = check_resources(prompt)
-    # elif prompt == "cappuccino":
-    #     ingredients_available = check_resources(prompt)
+    if prompt == "espresso" or prompt == "latte" or prompt == "cappuccino":
+        process_order(prompt)
